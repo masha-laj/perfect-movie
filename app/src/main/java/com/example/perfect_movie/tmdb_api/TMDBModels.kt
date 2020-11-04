@@ -1,5 +1,9 @@
 package com.example.perfect_movie.tmdb_api
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
+@Parcelize
 data class TMDBMovie(
     var id: Int,
     var poster_path: String,
@@ -15,7 +19,7 @@ data class TMDBMovie(
     var vote_count: Int,
     var video: Boolean,
     var vote_average: Float
-)
+) : Parcelable
 
 data class TMDBDates(var maximum: String, var minimum: String)
 
