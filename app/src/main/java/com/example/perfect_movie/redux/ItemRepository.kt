@@ -17,6 +17,6 @@ class UpcomingItemRepository() : ItemRepository {
 class RatedItemRepository() : ItemRepository {
 
     override suspend fun fetchItems(page: Int): List<TMDBMovie> {
-        return tmdbClient.getUpcoming(page) // CHANGE
+        return tmdbClient.getRated(page)
     }
 }

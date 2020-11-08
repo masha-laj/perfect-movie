@@ -2,49 +2,44 @@ package com.example.perfect_movie
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.NavigationUI
 import com.example.perfect_movie.redux.AppState
 import com.example.perfect_movie.redux.MoviesCategory
 import com.example.perfect_movie.redux.NetworkThunks
 import com.example.perfect_movie.redux.reducer
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
-import org.reduxkotlin.*
+import org.reduxkotlin.applyMiddleware
+import org.reduxkotlin.compose
+import org.reduxkotlin.createThreadSafeStore
+import org.reduxkotlin.createThunkMiddleware
+
 
 val networkThunks = NetworkThunks(Dispatchers.IO)
 val store by lazy {
     createThreadSafeStore(
         reducer, AppState.INITIAL_STATE,
         compose(
-            listOf(//presenterEnhancer(Dispatchers.Main),
+            listOf(
                 applyMiddleware(createThunkMiddleware())
             )
         )
     )
-//                //uiMiddleware(networkThunks, Dispatchers.Main),
-//                //navigationMiddleware(navigator),
-//                //loggerMiddleware,
-//                //settingsMiddleware(localStorageSettingsRepository, networkContext)))))
 }
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var storeSubscription: StoreSubscription
-    private var adapter = MoviesAdapter()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        moviesRV.layoutManager = LinearLayoutManager(this)
-        moviesRV.setHasFixedSize(true)
-        moviesRV.adapter = adapter
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navController = navHostFragment.navController
+        NavigationUI.setupWithNavController(bottomNavigation, navController)
+        NavigationUI.setupActionBarWithNavController(this, navController)
 
-        storeSubscription = store.subscribe { render(store.state) }
+        store.dispatch(networkThunks.fetchItems(MoviesCategory.RATED, 1));
         store.dispatch(networkThunks.fetchItems(MoviesCategory.UPCOMING, 1));
-        render(store.state)
-    }
-
-    private fun render(state: AppState) {
-        adapter.submitList(state.upcomingMovies)
     }
 }

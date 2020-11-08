@@ -12,9 +12,11 @@ class TMDBApi constructor(private val apikey: String) {
     }
 
     private val endpoint = "https://api.themoviedb.org/3"
+    private val imageEndpoint = "https://image.tmdb.org/t/p/w500"
     private val urlBuilder = endpoint.toHttpUrl()
     private val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
     private val tmdbUpcomingResponseAdapter = moshi.adapter(TMDBUpcomingResponse::class.java)
+    private val tmdbRatedResponseAdapter = moshi.adapter(TMDBRatedResponse::class.java)
 
     fun getUpcoming(page: Int): List<TMDBMovie> {
         val url = urlBuilder.newBuilder().addPathSegments("movie/upcoming")
@@ -31,5 +33,26 @@ class TMDBApi constructor(private val apikey: String) {
                 tmdbUpcomingResponseAdapter.fromJson(response.body!!.source()) ?: return listOf()
             return json.results
         }
+    }
+
+    fun getRated(page: Int): List<TMDBMovie> {
+        val url = urlBuilder.newBuilder().addPathSegments("movie/top_rated")
+            .addQueryParameter("api_key", apikey)
+            .addQueryParameter("language", "ru-RU")
+            .addQueryParameter("page", page.toString())
+            .build()
+        val request = Request.Builder()
+            .url(url)
+            .build()
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) return listOf()
+            val json =
+                tmdbRatedResponseAdapter.fromJson(response.body!!.source()) ?: return listOf()
+            return json.results
+        }
+    }
+
+    fun getImageUrl(path: String): String {
+        return "${imageEndpoint}${path}";
     }
 }

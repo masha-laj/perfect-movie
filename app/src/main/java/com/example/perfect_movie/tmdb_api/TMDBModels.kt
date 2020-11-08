@@ -30,3 +30,10 @@ data class TMDBUpcomingResponse(
     var total_pages: Int,
     var total_results: Int
 )
+
+data class TMDBRatedResponse(
+    var page: Int,
+    var results: List<TMDBMovie>,
+    var total_pages: Int,
+    var total_results: Int
+)
